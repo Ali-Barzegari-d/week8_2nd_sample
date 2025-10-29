@@ -10,12 +10,12 @@
 In this lab, you will integrate your understanding of C++ exception safety, RAII, templates, and compile-time type analysis.  
 You will implement multiple modular components that demonstrate resource management, template-based abstractions, and concept-driven constraints.
 
-The lab consists of five graded tasks:
+The lab consists of four tasks:
 
-- **ConfigManager** – file-based configuration management with exception safety.  
-- **Result<T, E>** – header-only generic result type; you will implement the methods using TODO hints.  
-- **TaskScheduler** – task execution pipeline with exception handling.  
-- **ResourceLogger** – RAII-based logging system with timestamps and move semantics.    
+- **Result<T, E>** – header-only generic result type; you will implement the methods using TODO hints.    
+- **Expression Evaluator Library** — simple parsing and computation
+- **Statistics Library** — static library structure with encapsulation and debug flags 
+- **Text Utility Library** — header/source separation with preprocessor-controlled logging 
 
 All work is autograded via CI/CTest.  
 When the GitHub Actions build is green, you earn full marks.
@@ -25,38 +25,21 @@ When the GitHub Actions build is green, you earn full marks.
 ## 2. Learning Objectives
 
 By the end of this lab, you should be able to:
-
-- Apply RAII for safe resource lifetime management.  
+ 
 - Use C++ templates and concepts to write type-safe generic code.  
-- Manage error handling using exceptions, std::optional, and std::variant.  
-- Implement strong and basic exception safety guarantees.  
-- Detect and classify types at compile time using type traits.  
-- Build modular C++ code that passes automated tests.
+- Apply **header/source separation** and respect the *One Definition Rule (ODR)*.  
+- Use **namespaces** to organize code logically and prevent symbol conflicts.  
+- Employ **conditional compilation** (`#ifdef`, `#define`) to toggle debug or logging features.  
+- Design **static library–style** code that exposes a small, stable API and hides implementation details.  
+- Utilize **structs, enums, and classes** effectively to build clear, testable components.  
+- Implement safe, minimal, and modular C++ code that supports automated testing.
+
 
 ---
 
-## 3. Task A — ConfigManager
+## 3. Task A — Result<T, E>
 
-You are given a class **ConfigManager** that loads, edits, and saves key–value pairs from a configuration file.
-
-### Required Behavior
-- Constructor receives a file path. If file cannot be opened, throw `std::runtime_error("File not found")`.  
-- Store configuration as `std::map<std::string, std::string>`.  
-- Implement:
-  - `std::optional<std::string> get(const std::string& key) const;`
-  - `void set(const std::string& key, const std::string& value);`
-  - `void save() const;` – overwrite file contents with current data.  
-- Handle malformed or empty lines safely.  
-- Guarantee basic exception safety.  
-- Manage file resources using RAII (automatic close on scope exit).
-
-### Concepts Covered
-Exception safety, RAII, file I/O, std::optional, resource management.
-
----
-
-## 4. Task B — Result<T, E>
-
+### Description
 You are given a **header-only template class** `Result<T, E>` similar to Rust’s Result. **No `.cpp` file is used; all implementations must be written in `Result.hpp`.**
 
 ### Required Behavior
@@ -77,42 +60,109 @@ Class templates, std::variant, error modeling, safe value access, exception prop
 
 ---
 
-## 5. Task C — TaskScheduler
+## 4. Task B — Expression Evaluator Library
 
-You are given a class **TaskScheduler** that manages and executes tasks safely.
+### Description
+You will implement a small C++ library that parses and evaluates arithmetic expressions given as strings.  
+The program must tokenize input, perform sequential evaluation, and summarize the result.
 
 ### Required Behavior
-- Hold a collection of `std::function<void()>` tasks.  
-- Provide:
-  - `void add_task(const std::function<void()>& task);`
-  - `void run_all();` — executes each task sequentially.
-  - `std::vector<std::string> get_errors() const;` — returns messages of failed tasks.  
-- During `run_all()`, if a task throws an exception, catch it, store its message, and continue with remaining tasks.  
-- Use RAII and guarantee no resource leaks.
+- Implement the following functions inside namespace `csi::expr`:
+  - `Operator parse_operator(const std::string&)`  
+    → Convert `"+"`, `"-"`, `"*"`, `"/"` to the corresponding enum; otherwise return `Unknown`.  
+  - `Expression parse_expression(const std::string&)`  
+    → Tokenize numeric and operator elements into an `Expression` object.  
+  - `double evaluate(const Expression&)`  
+    → Apply operations **left to right** (ignore operator precedence).  
+    → On division by zero, return `0`.  
+  - `std::string summarize(const Expression&)`  
+    → Return a formatted report:  
+      `"Expression with N operations, final result = X"`
 
 ### Concepts Covered
-Function objects, task management, exception handling, safe sequential execution.
+- Header/source separation  
+- Enums and structs  
+- String parsing and tokenization  
+- Namespace encapsulation  
+- Safe arithmetic evaluation  
 
 ---
 
-## 6. Task D — ResourceLogger
+## 5. Task C — Statistics Library (Static Library Style)
 
-You are given a class **ResourceLogger** that logs messages with timestamps and levels.
+### Description
+In this task, you will create a **small statistics utility library** designed for static linking.  
+You will combine helper functions and a class into a cleanly separated `.hpp`/`.cpp` pair.  
+The library should support debug output via **conditional compilation**.
+
 
 ### Required Behavior
-- On construction, open a log file (append mode). If failed, throw `std::runtime_error("Cannot open log file")`.  
-- Support log levels via `enum class Level { INFO, WARNING, ERROR };`.  
-- Implement:
-  - `void write(Level level, const std::string& message);`  
-  - Write lines in format `[YYYY-MM-DD HH:MM:SS] [LEVEL] message`.  
-- If writing fails, throw `std::runtime_error("Failed to write log")`.  
-- Manage file automatically (RAII).  
-- Support move semantics; forbid copying.  
-- Destructor closes file and never throws.  
-- Guarantee basic and strong exception safety where applicable.
+Implement inside namespace `mathlib::stats`:
+
+- `double mean(const std::vector<double>& nums);`  
+  → Return the average; `0.0` if empty.  
+
+- `double variance(const std::vector<double>& nums);`  
+  → Compute average of squared differences using `mean()`. Return `0.0` if fewer than 2 elements.  
+
+- `std::optional<double> find_max(const std::vector<double>& nums);`  
+  → Return `std::nullopt` if empty; otherwise the largest value.  
+
+- **Class `Stats`**
+  - Constructor: `Stats(const std::vector<double>& data);`
+  - Method: `std::string summary();`  
+    → Return `"mean=..., variance=..., max=..."`  
+    → When `DEBUG_MODE` is defined, also print:  
+      ```
+      [DEBUG] Computing summary for N elements
+      ```
 
 ### Concepts Covered
-RAII, file handling, timestamps (`std::chrono`), move semantics, exception safety guarantees.
+- Static library architecture  
+- Conditional compilation (`#define DEBUG_MODE`)  
+- Optional values and safety  
+- Encapsulation in classes  
+- Namespace hygiene  
+
+---
+
+## 6. Task D — Text Utility Library (Header/Source Separation & Preprocessor Logic)
+
+### Description
+This final exercise reinforces modular text processing and preprocessor-based configuration.  
+You will implement utility functions that transform and summarize text collections.  
+Logging is controlled by the compile-time flag `ENABLE_LOG`.
+
+
+### Required Behavior
+Implement inside namespace `textlib::util`:
+
+- `std::string to_upper(const std::string& input);`  
+  → Convert all alphabetic characters to uppercase using `std::transform`.
+
+- `std::optional<std::string> find_longest(const std::vector<std::string>& words);`  
+  → Return `std::nullopt` if empty; otherwise, the longest string.
+
+- `std::string join(const std::vector<std::string>& words, char sep);`  
+  → Concatenate words separated by `sep` (no trailing separator).
+
+- `void log_summary(const std::vector<std::string>& words);`  
+  → If `ENABLE_LOG` is defined, print:  
+    ```
+    [LOG] Count: X, Longest: Y
+    ```
+    Otherwise, do nothing.
+
+- `std::string summary(const std::vector<std::string>& words);`  
+  → Always call `log_summary(words)` internally.  
+  → Return `"Count=X, Longest=Y"`, or `"Count=0, Longest=N/A"` if empty.
+
+### Concepts Covered
+- Header/source separation  
+- Conditional compilation (`#ifdef ENABLE_LOG`)  
+- Optional values  
+- Text processing utilities  
+- Reusable library design  
 
 ---
 
