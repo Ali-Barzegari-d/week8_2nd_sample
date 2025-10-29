@@ -7,8 +7,13 @@
 
 ## 1. Overview
 
-In this lab, you will integrate your understanding of C++ exception safety, RAII, templates, and compile-time type analysis.  
-You will implement multiple modular components that demonstrate resource management, template-based abstractions, and concept-driven constraints.
+In this lab, you will deepen your understanding of **C++ code organization**, focusing on:
+
+- templates, and type analysis
+- clean separation of interface and implementation,  
+- safe and modular library design,  
+- proper use of the preprocessor for debugging and configuration, and  
+- namespace hygiene and encapsulation.  
 
 The lab consists of four tasks:
 
