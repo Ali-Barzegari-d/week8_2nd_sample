@@ -5,23 +5,31 @@
 
 namespace mathlib::stats {
 
+    // DEBUG_MODE will control whether extra logs appear
     #define DEBUG_MODE 1
 
-    // TODO: Declare a function double mean(const std::vector<double>& nums)
-    //  - Return 0.0 if the vector is empty
+    // Returns the arithmetic mean of a vector.
+    // Returns 0.0 if the vector is empty.
+    double mean(const std::vector<double>& nums);
 
-    // TODO: Declare a function double variance(const std::vector<double>& nums)
-    //  - Use the mean() function
-    //  - Return 0.0 if the vector has less than 2 elements
+    // Returns the variance of a vector (population variance).
+    // Returns 0.0 if fewer than 2 elements exist.
+    double variance(const std::vector<double>& nums);
 
-    // TODO: Declare a helper function std::optional<double> find_max(const std::vector<double>& nums)
-    //  - Return std::nullopt if empty, otherwise the maximum element
+    // Returns the maximum value in a vector, or std::nullopt if empty.
+    std::optional<double> find_max(const std::vector<double>& nums);
 
-    // TODO: Define a class Stats
-    //  - Constructor takes a const std::vector<double>&
-    //  - Method summary() returns a formatted std::string:
-    //        "mean=..., variance=..., max=..."
-    //  - When DEBUG_MODE is defined, summary() should also print to console:
-    //        "[DEBUG] Computing summary for N elements"
+    // Class to compute and summarize basic statistics.
+    class Stats {
+    public:
+        explicit Stats(const std::vector<double>& data);
 
-}
+        // Returns formatted string:
+        // "mean=..., variance=..., max=..."
+        std::string summary() const;
+
+    private:
+        std::vector<double> data_;
+    };
+
+} // namespace mathlib::stats

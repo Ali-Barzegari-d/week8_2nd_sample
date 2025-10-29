@@ -2,25 +2,54 @@
 #include <sstream>
 #include <iostream>
 #include <cmath>
+#include <limits>
 
 namespace mathlib::stats {
 
-    // TODO: Implement mean()
-    //  - Sum all numbers and divide by count
-    //  - Return 0.0 for empty input
+    double mean(const std::vector<double>& nums) {
+        if (nums.empty()) return 0.0;
+        double sum = 0.0;
+        for (double n : nums)
+            sum += n;
+        return sum / static_cast<double>(nums.size());
+    }
 
-    // TODO: Implement variance()
-    //  - Use the mean() function
-    //  - Compute average of squared differences
-    //  - Return 0.0 for less than 2 elements
+    double variance(const std::vector<double>& nums) {
+        if (nums.size() < 2) return 0.0;
+        double m = mean(nums);
+        double acc = 0.0;
+        for (double n : nums)
+            acc += (n - m) * (n - m);
+        return acc / static_cast<double>(nums.size());
+    }
 
-    // TODO: Implement find_max()
-    //  - Return std::nullopt if vector empty
-    //  - Otherwise return maximum value
+    std::optional<double> find_max(const std::vector<double>& nums) {
+        if (nums.empty()) return std::nullopt;
+        double max_val = std::numeric_limits<double>::lowest();
+        for (double n : nums)
+            if (n > max_val)
+                max_val = n;
+        return max_val;
+    }
 
-    // TODO: Implement class Stats methods
-    //  - In summary(), build a string using std::ostringstream
-    //  - Respect DEBUG_MODE: print a debug message to std::cout if defined
-    //  - Use the helper functions above internally
+    Stats::Stats(const std::vector<double>& data)
+        : data_(data) {}
 
-}
+    std::string Stats::summary() const {
+    #ifdef DEBUG_MODE
+        std::cout << "[DEBUG] Computing summary for "
+                  << data_.size() << " elements\n";
+    #endif
+
+        double m = mean(data_);
+        double v = variance(data_);
+        auto mx = find_max(data_);
+
+        std::ostringstream oss;
+        oss << "mean=" << m
+            << ", variance=" << v
+            << ", max=" << (mx.has_value() ? std::to_string(*mx) : "N/A");
+        return oss.str();
+    }
+
+} // namespace mathlib::stats

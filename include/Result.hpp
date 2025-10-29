@@ -4,46 +4,59 @@
 #include <variant>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
+
+
+struct OkTag {};
+struct ErrTag {};
 
 template <class T, class E>
 class Result {
 public:
-    // Construct success value
+    // Factory methods
     static Result<T, E> Ok(const T& value) {
-        // TODO: Create a Result holding a success value (store `value` in `data_`)
+        return Result<T, E>(OkTag{}, value);
     }
 
-    // Construct error value
     static Result<T, E> Err(const E& error) {
-        // TODO: Create a Result holding an error value (store `error` in `data_`)
+        return Result<T, E>(ErrTag{}, error);
     }
 
-    // Check whether the result is success or error
+    // State checkers
     bool is_ok() const noexcept {
-        // TODO: Return true if `data_` currently holds a success value of type T
+        return std::holds_alternative<OkWrapper>(data_);
     }
 
     bool is_err() const noexcept {
-        // TODO: Return true if `data_` currently holds an error value of type E
+        return std::holds_alternative<ErrWrapper>(data_);
     }
 
-    // Get success value; throw if this holds an error
+    // Accessors
     T unwrap() const {
-        // TODO: Return the success value; throw std::runtime_error if this is an error
+        if (is_ok()) {
+            return std::get<OkWrapper>(data_).value;
+        } else {
+            throw std::runtime_error("Tried to unwrap an error result");
+        }
     }
 
-    // Get error value; throw if this holds success
     E unwrap_err() const {
-        // TODO: Return the error value; throw std::runtime_error if this is a success
+        if (is_err()) {
+            return std::get<ErrWrapper>(data_).value;
+        } else {
+            throw std::runtime_error("Tried to unwrap an ok result");
+        }
     }
 
 private:
-    std::variant<T, E> data_;  // Holds either success or error value
+    struct OkWrapper { T value; };
+    struct ErrWrapper { E value; };
 
-    // Private constructor used by factory functions
-    explicit Result(const std::variant<T, E>& v) : data_(v) {
-        // TODO: Store the variant in `data_`
-    }
+    std::variant<OkWrapper, ErrWrapper> data_;
+
+    // Constructors
+    Result(OkTag, const T& value) : data_(OkWrapper{value}) {}
+    Result(ErrTag, const E& value) : data_(ErrWrapper{value}) {}
 };
 
 #endif // RESULT_HPP

@@ -5,31 +5,63 @@
 
 namespace textlib::util {
 
-    // TODO: Implement to_upper()
-    // - Return a copy of input where all letters are uppercase
-    // - Use std::transform and std::toupper
+// -----------------------------------
+// TODO: Implement to_upper()
+// Converts all letters in input to uppercase
+std::string to_upper(const std::string& input) {
+    std::string result = input; // make a copy
+    std::transform(result.begin(), result.end(), result.begin(),
+                   [](unsigned char c){ return std::toupper(c); });
+    return result;
+}
 
+// -----------------------------------
+// TODO: Implement find_longest()
+// Return the longest string or std::nullopt if empty
+std::optional<std::string> find_longest(const std::vector<std::string>& words) {
+    if (words.empty()) return std::nullopt;
+    return *std::max_element(words.begin(), words.end(),
+                             [](const std::string& a, const std::string& b){
+                                 return a.size() < b.size();
+                             });
+}
 
-    // TODO: Implement find_longest()
-    // - Return std::nullopt if vector is empty
-    // - Otherwise, return the word with maximum length
+// -----------------------------------
+// TODO: Implement join()
+// Concatenate words separated by 'sep'
+std::string join(const std::vector<std::string>& words, char sep) {
+    if (words.empty()) return "";
+    std::ostringstream oss;
+    for (size_t i = 0; i < words.size(); ++i) {
+        oss << words[i];
+        if (i != words.size() - 1)
+            oss << sep;
+    }
+    return oss.str();
+}
 
+// -----------------------------------
+// TODO: Implement log_summary()
+// Only logs if ENABLE_LOG is defined
+void log_summary(const std::vector<std::string>& words) {
+#ifdef ENABLE_LOG
+    auto longest = find_longest(words);
+    std::cout << "[LOG] Count: " << words.size() 
+              << ", Longest: " 
+              << (longest ? *longest : "N/A") << '\n';
+#endif
+}
 
-    // TODO: Implement join()
-    // - Combine all strings in 'words' separated by 'sep'
-    // - No separator after the last element
-
-
-    // TODO: Implement log_summary()
-    // - If ENABLE_LOG is defined:
-    //     Print "[LOG] Count: X, Longest: Y"
-    // - Otherwise, do nothing
-    // - Tip: Use find_longest() to find Y
-
-
-    // TODO: Implement summary()
-    // - Always call log_summary(words)
-    // - Return "Count=X, Longest=Y"
-    // - If vector empty, show "Longest=N/A"
+// -----------------------------------
+// TODO: Implement summary()
+// Calls log_summary and returns a string
+std::string summary(const std::vector<std::string>& words) {
+    log_summary(words);
+    auto longest = find_longest(words);
+    std::ostringstream oss;
+    oss << "Count=" << words.size()
+        << ", Longest=" << (longest ? *longest : "N/A");
+    return oss.str();
+}
 
 } // namespace textlib::util
