@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include <cmath>
+#include <limits>
 
 namespace mathlib::stats {
 

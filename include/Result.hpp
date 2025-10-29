@@ -4,6 +4,7 @@
 #include <variant>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 template <class T, class E>
 class Result {
